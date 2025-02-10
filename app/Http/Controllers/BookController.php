@@ -12,7 +12,8 @@ class BookController extends Controller
      */
     public function index()
     {
-        //
+        $books = Book::all();
+        return view('books.index', compact('books'));
     }
 
     /**
@@ -20,7 +21,7 @@ class BookController extends Controller
      */
     public function create()
     {
-        //
+        return view('books.create');
     }
 
     /**
@@ -28,7 +29,18 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'author' => 'required',
+        ]);
+
+        $book = new Book([
+            'title' => $request->input('title'),
+            'author' => $request->input('author'),
+        ]);
+        $book->save();
+
+        return redirect()->route('books.index');
     }
 
     /**
@@ -36,7 +48,7 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        //
+        return view('books.show', compact('book'));
     }
 
     /**
@@ -44,7 +56,7 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        //
+        return view('books.edit', compact('book'));
     }
 
     /**
@@ -52,7 +64,16 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'author' => 'required',
+        ]);
+
+        $book->title = $request->input('title');
+        $book->author = $request->input('author');
+        $book->save();
+
+        return redirect()->route('books.index');
     }
 
     /**
@@ -60,6 +81,24 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        //
+        $book->delete();
+
+        return redirect()->route('books.index');
+    }
+
+    /**
+     * Search for a book by its title, ISBN, author, or publisher.
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $books = Book::where('title', 'LIKE', "%$query%")
+            ->orWhere('isbn', 'LIKE', "%$query%")
+            ->orWhere('author', 'LIKE', "%$query%")
+            ->orWhere('publisher', 'LIKE', "%$query%")
+            ->get();
+
+        return view('books.index', compact('books'));
     }
 }
