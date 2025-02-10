@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
+    private $input;
+
     /**
      * Display a listing of the resource.
      */
@@ -100,7 +102,8 @@ class BookController extends Controller
      */
     public function search(Request $request)
     {
-        $query = $request->input('query');
+        $this->input = $request->input('query');
+        $query = $this->input;
 
         $books = Book::where('title', 'LIKE', "%{$query}%")
             ->orWhere('isbn', 'LIKE', "%{$query}%")
