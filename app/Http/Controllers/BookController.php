@@ -31,14 +31,17 @@ class BookController extends Controller
     {
         $request->validate([
             'title' => 'required',
+            'isbn' => 'required|unique:books,isbn',
             'author' => 'required',
+            'year_of_publication' => 'required|integer',
+            'publisher' => 'required',
+            'volumes_number' => 'required|integer',
+            'section' => 'required',
+            'bookcase' => 'required|integer',
+            'shelf' => 'required|integer',
         ]);
 
-        $book = new Book([
-            'title' => $request->input('title'),
-            'author' => $request->input('author'),
-        ]);
-        $book->save();
+        Book::create($request->all());
 
         return redirect()->route('books.index');
     }
@@ -66,15 +69,21 @@ class BookController extends Controller
     {
         $request->validate([
             'title' => 'required',
+            'isbn' => 'required|unique:books,isbn,' . $book->id,
             'author' => 'required',
+            'year_of_publication' => 'required|integer',
+            'publisher' => 'required',
+            'volumes_number' => 'required|integer',
+            'section' => 'required',
+            'bookcase' => 'required|integer',
+            'shelf' => 'required|integer',
         ]);
 
-        $book->title = $request->input('title');
-        $book->author = $request->input('author');
-        $book->save();
+        $book->update($request->all());
 
-        return redirect()->route('books.index');
+        return redirect()->route('books.index')->with('success', 'Book updated successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -93,12 +102,18 @@ class BookController extends Controller
     {
         $query = $request->input('query');
 
-        $books = Book::where('title', 'LIKE', "%$query%")
-            ->orWhere('isbn', 'LIKE', "%$query%")
-            ->orWhere('author', 'LIKE', "%$query%")
-            ->orWhere('publisher', 'LIKE', "%$query%")
+        $books = Book::where('title', 'LIKE', "%{$query}%")
+            ->orWhere('isbn', 'LIKE', "%{$query}%")
+            ->orWhere('author', 'LIKE', "%{$query}%")
+            ->orWhere('publisher', 'LIKE', "%{$query}%")
             ->get();
+
+        if ($books->isEmpty()) {
+            return redirect()->route('books.index')->with('error', 'No books found matching your search.');
+        }
 
         return view('books.index', compact('books'));
     }
+
+
 }
